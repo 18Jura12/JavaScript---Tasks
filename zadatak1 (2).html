@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zadatak1</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+</head>
+<body>
+    <div>
+        <input type="radio" name="prozor" value="otvori">
+        Otvaranje novog prozora: 
+        visina = <input type="text" name="visina" id="visina">, 
+        širina = <input type="text" name="sirina" id="sirina"><br>
+        <input type="radio" name="prozor" value="zatvori">
+        Zatvaranje prozora
+    </div><br>
+    <canvas width="600" height="600" id="cnv" style="border: 1px solid black;">Nemoguće otvoriti!</canvas>
+    <script>
+        $( document ).ready( function() {
+
+            let prozori = [];
+            let brojprozora = 0;
+
+            function crtaj() {
+
+                let ctx = $('#cnv')[0].getContext("2d");
+                let ispis = "";
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                for(let i = 0; i < prozori.length; i++) {
+
+                    //console.log(prozor);
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(prozori[i][0], prozori[i][1], prozori[i][2], prozori[i][3]);
+                    ctx.strokeRect(prozori[i][0], prozori[i][1], prozori[i][2], prozori[i][3]);
+                    ctx.fillStyle = 'gray';
+                    ctx.fillRect(prozori[i][0], prozori[i][1], prozori[i][2], 30);
+                    ctx.strokeRect(prozori[i][0], prozori[i][1], prozori[i][2], 30);
+                    ctx.fillStyle = 'red';
+                    ctx.fillRect(prozori[i][0]+prozori[i][2]-30, prozori[i][1], 30, 30);
+                    ctx.strokeRect(prozori[i][0]+prozori[i][2]-30, prozori[i][1], 30, 30);
+                    ctx.font = '12pt Verdana';
+                    ctx.fillStyle = 'black';
+                    ctx.fillText('Prozor'+(prozori[i][4]).toString(),prozori[i][0]+10, prozori[i][1]+20);
+                    ctx.font = '30pt';
+                    ctx.fillText('X',prozori[i][0]+prozori[i][2]-20, prozori[i][1]+20);
+                    $('#poruka').remove();
+                    ispis += ' Prozor'+ prozori[i][4] +' ';
+
+
+                }
+                $('body').append($('<p id="poruka">Trenutno je otvoreno '+prozori.length+' prozora!<br>To su: '+ispis+'</p>'));
+
+            }
+
+
+            $('#cnv').on('click', function() {
+
+                if( $('input[type="radio"]:checked').val() == 'otvori') {
+
+                    console.log('tu');
+                    let visina = parseInt($('#visina').val());
+                    let sirina = parseInt($('#sirina').val());
+                    let can = $('#cnv')[0].getBoundingClientRect();
+                    let x = event.clientX - can.left;
+                    let y = Math.floor(event.clientY - can.top);
+                    //console.log(sirina, x, parseInt(sirina) + x);
+                    let re = /[1-9][0-9]*/;
+                    if(!re.test(visina) || !re.test(sirina)) {
+
+                        alert('Vrijednosti moraju biti brojčane!');
+
+                    }
+                    if(x + sirina > 600 || y + visina > 600) {
+
+                        alert('Prevelik prozor!');
+
+                    } else {
+
+                        brojprozora++;
+                        prozori.push([x,y,sirina,visina,brojprozora]);
+                        
+                    }
+
+                } else {
+
+                    //console.log(prozori);
+                    let can = $('#cnv')[0].getBoundingClientRect();
+                    let x = event.clientX - can.left;
+                    let y = Math.floor(event.clientY - can.top);
+                    for(let i=0; i < prozori.length; i++) {
+
+                        console.log('gledam za ' + prozori[i][4]);
+                        let krivo = false;
+                        if(x > prozori[i][0]+prozori[i][2]-30 && x < prozori[i][0]+prozori[i][2] && y > prozori[i][1] && y < prozori[i][1]+30) {
+
+                            console.log('x');
+                            for(let j=i+1; j < prozori.length; j++) {
+
+                                console.log('   pokriva li ga ' + prozori[j][4]);
+                                if(x > prozori[j][0] && x < prozori[j][0]+prozori[j][2] && y > prozori[j][1] && y < prozori[j][1]+prozori[j][3]) {
+
+                                    krivo = true;
+                                    break;
+
+                                }
+
+                            }
+                            if(!krivo) {
+
+                                console.log('briše');
+                                prozori.splice(i,1);
+                                break;
+
+                            }
+
+                        }
+
+                    }
+
+                }
+                crtaj();
+
+            });
+
+
+        });
+    </script>
+</body>
+</html>

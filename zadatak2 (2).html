@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zadatak2</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <style>
+        td {
+
+            border: 1px solid black;
+            height: 50px;
+            width: 50px;
+            text-align: center;
+            font-size: 20px;
+
+        }
+    </style>
+</head>
+<body>
+    <select name="igre" id="igre">
+        <option value="1">PRVA</option>
+        <option value="2">DRUGA</option>
+        <option value="3">TRECA</option>
+    </select>
+    <script>
+        $(document).ready(function() {
+
+            let polja = [];
+            let odabir = "";
+            let otvorene = [];
+            let broj_otv = 0;
+            let bodovi = 0;
+            let kraj = 0;
+
+            function postavi() {
+
+                odabir = $('#igre').children('option:selected').html();
+                //console.log(odabir);
+                if(odabir.length != 0) {
+
+                    $.ajax({
+
+                        type: 'GET',
+                        url: 'zadatak2.php',
+                        data: {
+
+                            ime: odabir 
+
+                        },
+                        success: function(data) {
+
+                            //console.log(data['R']);
+                            kraj = data['R']*data['S']/2;
+                            bodovi = 0;
+                            broj_otv = 0;
+                            otvorene.splice(0);
+                            polja.splice(0);
+                            $('table').remove();
+                            $('p').remove();
+                            $('body').append($('<table id="mem"></table>'));
+                            for(let i=0; i<data['R']; i++) {
+
+                                $('#mem').append($('<tr class='+i+'></tr>'));
+                                let red = [];
+                                for(let j=0; j<data['S']; j++) {
+
+                                    red.push(' ');
+                                    //console.log(i, $('#'+i).html());
+                                    $('tr.'+i).append('<td class="'+j+'"> </td>');
+                                    //console.log($('#mem').html());
+
+                                }
+                                polja.push(red);
+
+                            }
+                            $('body').append($('<p>Broj bodova: '+bodovi+'    Ukupno otvorenih polja: '+broj_otv+'</p>'));
+
+                        }
+
+                    });
+
+                }
+
+            }
+
+            function igraj() {
+
+                //console.log($(this).attr('class'), $(this).parent().attr('class'));
+                let R = $(this).parent().attr('class');
+                let S = $(this).attr('class');
+                if(polja[R][S] == ' ') {
+
+                    $.ajax({
+
+                        type: 'GET',
+                        url: 'zadatak2.php',
+                        data: {
+
+                            ime: odabir,
+                            R: R,
+                            S: S
+
+                        },
+                        success: function(data) {
+
+                            //console.log(data);
+                            otvorene.push([R, S, data]);
+                            polja[R][S] = data;
+                            $('tr.'+R).children('td.'+S).html(data).css('background-color', 'gray');
+                            broj_otv++;
+                            if(otvorene.length == 2) {
+
+                                if(otvorene[0][2] != otvorene[1][2]) {
+
+                                    polja[otvorene[0][0]][otvorene[0][1]] = ' ';
+                                    polja[otvorene[1][0]][otvorene[1][1]] = ' ';
+                                    setTimeout(function(){
+
+                                        $('tr.'+otvorene[0][0]).children('td.'+otvorene[0][1]).html(' ').css('background-color', 'white');
+                                        $('tr.'+otvorene[1][0]).children('td.'+otvorene[1][1]).html(' ').css('background-color', 'white');
+                                        otvorene.splice(0,2);
+
+                                    },1000);
+
+                                } else {
+
+                                    bodovi++;
+                                    otvorene.splice(0,2);
+
+                                }
+
+                            }
+                            //console.log(otvorene);
+                            $('p').remove();
+                            $('body').append($('<p>Broj bodova: '+bodovi+'    Ukupno otvorenih polja: '+broj_otv+'</p>'));
+                            if(bodovi == kraj) {
+
+                                alert('Pobijedili ste!');
+
+                            }
+
+                        }
+
+                    });
+
+                }
+
+            }
+
+            $('#igre').on('change', postavi);
+
+            $('body').on('click', 'td', igraj);
+
+        });
+    </script>
+</body>
+</html>
+
+<!-- $.ajax({
+
+    type: 'GET',
+    url: 'nešto.php',
+    data: {
+
+        nešto: nešto
+
+    },
+    success: function() {
+
+
+
+    }
+
+}); -->
+

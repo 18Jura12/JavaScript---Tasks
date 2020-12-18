@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zadatak1</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+</head>
+<body>
+    <div>
+        Broj redaka: 
+        <input type="text" name="R" id="R"><br>
+        Broj stupaca: 
+        <input type="text" name="S" id="S"><br>
+        <button type="submit" id="crtaj">Crtaj!</button>
+    </div>
+    <canvas width="500" height="500" id="cnv">Neuspjelo učitavanje slike!</canvas>
+    <script>
+
+    $( document ).ready( function()
+    {
+        let obojani = 0;
+        let boja = 0;
+        let ctx = $('#cnv')[0].getContext("2d");
+        let cells = [];
+
+
+        function bojaj() {
+
+            //console.log('tu');
+            let red = $('#R').val();
+            let stup = $('#S').val();
+            let can = $('#cnv')[0].getBoundingClientRect();
+            let poljeh = Math.floor(ctx.canvas.height/red);
+            let poljew = Math.floor(ctx.canvas.width/stup);
+            let col = Math.floor((event.clientX - can.left) / poljew);
+            let row = Math.floor((event.clientY - can.top) / poljeh);
+            //console.log(boja);
+
+            if(event.button == 0) {
+
+                if(boja%2 == 0) {
+
+                    ctx.fillStyle = 'blue';
+                    boja++;
+
+                } else {
+
+                    ctx.fillStyle = 'red';
+                    boja--;
+
+                }
+                obojani++;
+                cells[col][row] = 'o';
+                console.log(obojani);
+                ctx.fillRect( col*poljew, row*poljeh, poljew, poljeh);
+                $('#poruka').remove();
+                $("body").append($('<p id="poruka">Broj obojanih polja je: ' + obojani.toString() + '.</p>'));
+
+            }
+
+        }
+
+        function validate() {
+
+            let re = /[1-9][0-9]?/;
+            let red = $('#R').val();
+            let stup = $('#S').val();
+
+            console.log(red, stup);
+            if(re.test(red) && re.test(stup)) {
+
+                if(red>=0 && red<=20 && stup>=0 && stup<=20) {
+
+                    return true;
+
+                }
+
+            }
+            return false;
+
+        }
+
+        $('#crtaj').on('click', function() {
+
+            $('#cnv').off('mousedown');
+
+            if(validate()) {
+
+                obojani = 0;
+                boja = 0;
+                let red = $('#R').val();
+                let stup = $('#S').val();
+                cells = new Array(stup);
+                for (let i = 0; i < stup; i++) {
+                    cells[i] = new Array(red);
+                }
+                let poljeh = Math.floor(ctx.canvas.height/red);
+                let poljew = Math.floor(ctx.canvas.width/stup);
+                //ctx.fillStyle = "lightgray";
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                for( let x = 0; x < stup; ++x )
+                    for( let y = 0; y < red; ++y )
+                    {
+                        cells[x][y] = 'n';
+                        //ctx.fillRect( 1 + x*31, 1 + y*31, 30, 30 );
+                        ctx.strokeRect( x*poljew, y*poljeh, poljew, poljeh);
+                    }
+                $('#poruka').remove();
+                $("body").append($('<p id="poruka">Broj obojanih polja je: ' + obojani.toString() + '.</p>'));
+                $('#cnv').on('mousedown', bojaj);
+
+            } else {
+
+                alert('Jedine dopuštene vrijednosti su brojevne između 1 i 20!');
+
+            }
+
+        });
+    });
+    </script>
+</body>
+</html>

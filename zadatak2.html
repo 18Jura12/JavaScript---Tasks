@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zadatak2</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+</head>
+<body>
+    <div>
+        Odaberi polazni grad: <br>
+        <tr>
+            <td><button>Zagreb</button></td>
+            <td><button>Split</button></td>
+            <td><button>Rijeka</button></td>
+            <td><button>Osijek</button></td>
+        </tr>
+    </div>
+    <script>
+        $( document ).ready( function() {
+
+            let polazni = "";
+            let ciljni = "";
+            $('button').on('click', function() {
+
+                //console.log($(this).html());
+                $(this).css('background-color', 'yellow' );
+                polazni = $(this).html();
+                        
+                $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost/~juco/RP2/kol2-16/zadatak2.php',
+                    data: {
+
+                        polazni: polazni
+
+                    },
+                    success: function(data) {
+
+                        $('#txt_ciljni').remove();
+                        $('#ciljni').remove();
+                        $('#vrijeme').remove();
+                        $('body').append($('<br><p id="txt_ciljni">Odaberi ciljni grad:</p>'));
+                        let gradovi = data;
+                        //console.log(gradovi);
+                        $('body').append($('<tr id="ciljni">'));
+                        for(let i = 0; i < gradovi.length; i++) {
+
+                            //console.log(polazni);
+                            $('#ciljni').append($('<td><button id="'+polazni+'" class="ciljni">'+gradovi[i]+'</button></td>'))
+
+                        }
+                        $('body').append($('<br>'));
+
+                        $('body').on('click', 'button.ciljni', function() {
+
+                            $(this).css('background-color', 'yellow' );
+                            ciljni = $(this).html();
+                            polazni = $(this).attr('id');
+                            //console.log(ciljni, polazni);
+
+                            $.ajax({
+
+                                type: 'GET',
+                                url: 'http://localhost/~juco/RP2/kol2-16/zadatak2.php',
+                                data: {
+
+                                    polazni: polazni,
+                                    ciljni: ciljni
+
+                                },
+                                success: function(data) {
+
+                                    console.log(data);
+                                    $('body').append($('<br><p id="txt_vrijeme">Odaberi vrijeme polaska:</p>'))
+                                             .append($('<tr id="vrijeme">'));
+                                    for(let i=0; i<data.length; i++) {
+
+                                        $('#vrijeme').append($('<td><button class="vrijeme">'+data[i]['polazak']+'<br>'+data[i]['cijena']+'kn</button></td>'));
+
+                                    }
+                                    $('body').append($('<br>'));
+
+                                    $('body').on('click', 'button.vrijeme', function() {
+
+                                        $(this).css('background-color', 'yellow' );
+                                        let tekst = $(this).html().split('<br>');
+                                        alert('Odabrali ste vlak od '+polazni+' do '+ciljni+' koji polazi u '+tekst[0]+' i košta '+tekst[1]);
+
+                                    });
+
+                                }
+
+                            });
+
+                        });
+
+                    }
+                    
+                });
+                
+
+            });
+
+        });
+    </script>
+</body>
+</html>
